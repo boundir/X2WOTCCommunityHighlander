@@ -137,7 +137,7 @@ simulated function bool CanEquipImplant(StateObjectReference ImplantRef)
 	///
 	/// ```ini
 	/// [XComGame.CHHelpers]
-	/// +ClassesAllowPsiPCS=ClassName
+	/// 
 	/// ```
 	return class'UIUtilities_Strategy'.static.GetStatBoost(Implant).StatType != eStat_PsiOffense || Unit.IsPsiOperative() || class'CHHelpers'.default.ClassesAllowPsiPCS.Find(Unit.GetSoldierClassTemplateName()) != INDEX_NONE;
 }
