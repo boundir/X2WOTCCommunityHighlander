@@ -75,7 +75,7 @@ function UpdateData()
 
 	if( RewardState != None && !ActionState.bCompleted)
 	{
-		Value = RewardState.GetRewardPreviewString();
+		Value = UpdateRewardStringOnSlotUpdated(RewardState.GetRewardPreviewString()); // Issue #1379
 		if( Value != "" && RewardState.GetMyTemplateName() != 'Reward_DecreaseRisk')
 		{
 			Value = class'UIUtilities_Text'.static.GetColoredText(m_strSoldierReward @ Value, eUIState_Good);
@@ -184,12 +184,12 @@ function UpdateData()
 						ParamTag = XGParamTag(`XEXPANDCONTEXT.FindTag("XGParam"));
 						ParamTag.StrValue0 = CohesionUnitNames;
 						Value2 = `XEXPAND.ExpandString(m_strGainedCohesion); // Cohesion increased
-						Value3 = (RewardState != none) ? RewardState.GetRewardString() : "";
+						Value3 = (RewardState != none) ? UpdateRewardStringOnSlotUpdated(RewardState.GetRewardString()) : ""; // Issue #1379
 					}
 					else
 					{
 						// If there are no other soldiers on the CA for cohesion, bump the reward info to the second line
-						Value2 = (RewardState != none) ? RewardState.GetRewardString() : "";
+						Value2 = (RewardState != none) ? UpdateRewardStringOnSlotUpdated(RewardState.GetRewardString()) : ""; // Issue #1379
 					}
 				}
 			}
@@ -345,5 +345,30 @@ function ReassignStaff(StaffUnitInfo UnitInfo)
 
 	UpdateDisplay();
 }
+
+// Start Issue #1379
+/// HL-Docs: feature:CovertAction_UpdateRewardString; issue:1379; tags:strategy
+/// Fires an event that allows listeners to override the reward preview string
+/// ```event
+/// EventID: CovertAction_UpdateRewardString,
+/// EventData: [ inout string RewardString ],
+/// EventSource: UICovertActionStaffSlot,
+/// NewGameState: none
+/// ```
+private function string UpdateRewardStringOnSlotUpdated(string RewardString)
+{
+	local XComLWTuple Tuple;
+
+	Tuple = new class'XComLWTuple';
+	Tuple.Id = 'CovertAction_UpdateRewardString';
+	Tuple.Data.Add(1);
+	Tuple.Data[0].kind = XComLWTVString;
+	Tuple.Data[0].s = RewardString;
+
+	`XEVENTMGR.TriggerEvent('CovertAction_UpdateRewardString', Tuple, self, none);
+
+	return Tuple.Data[0].s;
+}
+// End Issue #1379
 
 //==============================================================================
